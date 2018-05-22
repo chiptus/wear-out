@@ -1,3 +1,5 @@
+// taken from appolo tutorail
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const { graphqlExpress, graphiqlExpress } = require('apollo-server-express');
@@ -23,9 +25,9 @@ const typeDefs = `
 
 // The resolvers
 const resolvers = {
-  Query: { 
-    books: () => books ,
-    book: (_, {title}) => books.find(b => b.title === title)
+  Query: {
+    books: () => books,
+    book: (_, { title }) => books.find(b => b.title === title),
   },
 };
 
