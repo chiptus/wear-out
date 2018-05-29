@@ -1,14 +1,8 @@
 import React from 'react';
-import {
-  View,
-  TextInput,
-  Image,
-  AsyncStorage,
-  Button,
-  ToastAndroid,
-} from 'react-native';
-import { FileSystem } from 'expo';
-import uuid from 'uuid/v4';
+import { View, TextInput, Image, Button, ToastAndroid } from 'react-native';
+import { saveSuit } from '../../lib/state';
+import { saveSuitImage } from '../../lib/images';
+
 export default class SaveSuit extends React.Component {
   static navigationOptions = {
     title: 'Save Suit',
@@ -21,37 +15,12 @@ export default class SaveSuit extends React.Component {
   submit = async () => {
     const photo = this.props.navigation.getParam('photo', null);
     const { description } = this.state;
-    const id = uuid();
-    await FileSystem.copyAsync({
-      from: photo,
-      to: `file://${FileSystem.documentDirectory}/${id}.png`,
-    });
-    const suits = await this.getSuits();
-    suits.ids.push(id);
-    suits.byId[id] = {
-      description,
-      createdAt: Date.now(),
-      id,
-    };
-    await AsyncStorage.setItem('suits', JSON.stringify(suits));
+    const id = await saveSuit({ description });
+    await saveSuitImage(id, photo);
+
     this.props.navigation.navigate('Suit', { id });
     ToastAndroid.show('Saved', ToastAndroid.SHORT);
   };
-
-  async getSuits() {
-    const suitsString = await AsyncStorage.getItem('suits');
-    try {
-      const suits = JSON.parse(suitsString);
-      suits.ids = suits.ids || [];
-      suits.byId = suits.byId || {};
-      return suits;
-    } catch (e) {
-      return {
-        byId: {},
-        ids: [],
-      };
-    }
-  }
 
   componentDidMount() {}
 
