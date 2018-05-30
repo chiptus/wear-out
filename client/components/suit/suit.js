@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View, Image } from 'react-native';
-import { FileSystem } from 'expo';
 import { getSuit } from '../../lib/state';
-
+import { getImageName } from '../../lib/images';
+import { format } from 'date-fns';
 export default class SuitScreen extends React.Component {
   state = {
     suit: null,
@@ -24,15 +24,17 @@ export default class SuitScreen extends React.Component {
         </View>
       );
     }
+    console.log(suit);
     return (
       <View>
         <Image
           source={{
-            uri: `file://${FileSystem.documentDirectory}/${suit.id}.png`,
+            uri: getImageName(suit.id),
           }}
           style={{ width: 250, height: 250 }}
         />
         <Text>{suit.description}</Text>
+        <Text>{format(suit.createdAt, 'DD/MM/YYYY')}</Text>
       </View>
     );
   }
