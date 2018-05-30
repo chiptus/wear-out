@@ -21,6 +21,8 @@ export default class GalleryScreen extends React.Component {
     const { navigation } = this.props;
     const sortAsc = navigation.getParam('sortAsc', false);
     this.setState({ sortAsc });
+
+    this.props.navigation.setParams({ onClickSort: this.onClickSort });
   }
 
   renderCaption() {
@@ -65,7 +67,7 @@ export default class GalleryScreen extends React.Component {
   }
 
   componentWillUnmount() {
-    // make this function a noop incase unmounted
+    // makes this function a noop incase unmounted
     this.onChangeImage = () => {};
   }
 
@@ -73,17 +75,31 @@ export default class GalleryScreen extends React.Component {
     this.setState({ currentImageIndex: index });
   };
 
+  onClickSort = () => {
+    const { sortAsc } = this.state;
+    const sort = !sortAsc;
+    this.setState({ sortAsc: sort });
+    this.props.navigation.setParams({ sortAsc: sort });
+  };
+
   render() {
     const { suits, sortAsc } = this.state;
-    console.log('sort', sortAsc);
+    const images = suits
+      .sort((a, b) => {
+        if (!sortAsc) {
+          return b.createdAt - a.createdAt;
+        }
+        return a.createdAt - b.createdAt;
+      })
+      .map(s => ({
+        source: { uri: getImageName(s.id) },
+        dimensions: { width: 150, height: 150 },
+      }));
     return (
       <View style={{ flex: 1 }}>
         <Gallery
           style={{ flex: 1, backgroundColor: 'black' }}
-          images={suits.map(s => ({
-            source: { uri: getImageName(s.id) },
-            dimensions: { width: 150, height: 150 },
-          }))}
+          images={images}
           onPageSelected={this.onChangeImage}
         />
         {this.renderCaption()}
@@ -92,16 +108,17 @@ export default class GalleryScreen extends React.Component {
   }
 
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {
+      onClickSort: () => {},
+      sortAsc: false,
+    };
 
     return {
       title: 'Gallery',
       headerRight: (
         <Button
-          title="Sort Ascending"
-          onPress={() => {
-            navigation.setParam('sortAsc', !params.sortAsc);
-          }}
+          title={params.sortAsc ? 'Asc' : 'Dec'}
+          onPress={params.onClickSort}
         />
       ),
     };
