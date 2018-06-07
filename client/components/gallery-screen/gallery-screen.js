@@ -1,11 +1,10 @@
 import React from 'react';
 import Gallery from 'react-native-image-gallery';
-import { View, Text, Button } from 'react-native';
+import { View, Button } from 'react-native';
 
 import { getSuits } from '../../lib/state';
 import { getImageName } from '../../lib/images';
-
-import { format } from 'date-fns';
+import Caption from './caption';
 
 export default class GalleryScreen extends React.Component {
   state = {
@@ -17,53 +16,6 @@ export default class GalleryScreen extends React.Component {
   async componentDidMount() {
     const { ids, byId } = await getSuits();
     this.setState({ suits: ids.map(id => byId[id]) });
-
-    const { navigation } = this.props;
-    const sortAsc = navigation.getParam('sortAsc', false);
-    this.setState({ sortAsc });
-
-    this.props.navigation.setParams({ onClickSort: this.onClickSort });
-  }
-
-  renderCaption() {
-    const { suits, currentImageIndex } = this.state;
-    if (!suits || !suits.length || currentImageIndex < 0) {
-      return null;
-    }
-    const suit = suits[currentImageIndex];
-    return (
-      <View
-        style={{
-          bottom: 0,
-          height: 65,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          width: '100%',
-          position: 'absolute',
-          justifyContent: 'center',
-        }}
-      >
-        <Text
-          style={{
-            textAlign: 'center',
-            color: 'white',
-            fontSize: 15,
-            fontStyle: 'italic',
-          }}
-        >
-          {suit.description || ''}
-        </Text>
-        <Text
-          style={{
-            textAlign: 'center',
-            color: 'white',
-            fontSize: 15,
-            fontStyle: 'italic',
-          }}
-        >
-          {format(suit.createdAt, 'DD/MM/YYYY')}
-        </Text>
-      </View>
-    );
   }
 
   componentWillUnmount() {
@@ -83,18 +35,11 @@ export default class GalleryScreen extends React.Component {
   };
 
   render() {
-    const { suits, sortAsc } = this.state;
-    const images = suits
-      .sort((a, b) => {
-        if (!sortAsc) {
-          return b.createdAt - a.createdAt;
-        }
-        return a.createdAt - b.createdAt;
-      })
-      .map(s => ({
-        source: { uri: getImageName(s.id) },
-        dimensions: { width: 150, height: 150 },
-      }));
+    const { suits, currentImageIndex } = this.state;
+    const sortAsc = this.props.navigation.getParam('sortAsc', false);
+    const images = sortImages(suits, sortAsc);
+    const currentImage =
+      currentImageIndex >= 0 ? suits[currentImageIndex] : null;
     return (
       <View style={{ flex: 1 }}>
         <Gallery
@@ -102,14 +47,13 @@ export default class GalleryScreen extends React.Component {
           images={images}
           onPageSelected={this.onChangeImage}
         />
-        {this.renderCaption()}
+        <Caption suit={currentImage} />
       </View>
     );
   }
 
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {
-      onClickSort: () => {},
+    const { sortAsc } = navigation.state.params || {
       sortAsc: false,
     };
 
@@ -117,10 +61,24 @@ export default class GalleryScreen extends React.Component {
       title: 'Gallery',
       headerRight: (
         <Button
-          title={params.sortAsc ? 'Asc' : 'Dec'}
-          onPress={params.onClickSort}
+          title={sortAsc ? 'Asc' : 'Dec'}
+          onPress={() => navigation.setParams({ sortAsc: !sortAsc })}
         />
       ),
     };
   };
+}
+
+function sortImages(suits, sortAsc) {
+  return suits
+    .sort((a, b) => {
+      if (!sortAsc) {
+        return b.createdAt - a.createdAt;
+      }
+      return a.createdAt - b.createdAt;
+    })
+    .map(s => ({
+      source: { uri: getImageName(s.id) },
+      dimensions: { width: 150, height: 150 },
+    }));
 }
