@@ -1,11 +1,15 @@
 import React from 'react';
 // import PropTypes from 'prop-types';
-import { StyleSheet, Text, View } from 'react-native';
-import { Camera, Permissions } from 'expo';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+  TouchableOpacity,
+} from 'react-native';
+import { Camera, Permissions, Constants } from 'expo';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import ButtonLine from './button-line';
-
-// eslint-disable-next-line react/prefer-stateless-function
 export default class AddScreen extends React.Component {
   state = {
     hasCameraPermission: null,
@@ -40,7 +44,8 @@ export default class AddScreen extends React.Component {
       return <Text>No access to camera</Text>;
     }
     // eslint-disable-next-line
-    const { navigate } = this.props.navigation;
+    const { navigate, goBack } = this.props.navigation;
+
     return (
       <View style={styles.container}>
         <Camera
@@ -48,31 +53,67 @@ export default class AddScreen extends React.Component {
           type={this.state.type}
           ref={ref => (this.camera = ref)}
           onMountError={({ message }) => console.log(message)}
-        />
-        <ButtonLine
-          onFlipPress={this.onFlipPress}
-          onSnapPress={this.onSnapPress}
-        />
+        >
+          <OpenClosetButton onPress={() => navigate('Closet')} />
+          <SnapPicture onSnap={this.onSnapPress} />
+        </Camera>
       </View>
     );
   }
+
+  static propTypes = {};
+
+  static navigationOptions = {
+    header: null,
+  };
 }
-
-AddScreen.propTypes = {};
-
-AddScreen.navigationOptions = {
-  title: 'Add Combination',
-};
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: Platform.OS === 'ios' ? 0 : Constants.statusBarHeight,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 10,
   },
   camera: {
-    flex: 0.75,
+    height: '100%',
     width: '100%',
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
+
+function OpenClosetButton({ onPress }) {
+  return (
+    <View
+      style={{
+        alignSelf: 'flex-start',
+        marginTop: 5,
+        marginLeft: 5,
+        backgroundColor: '#D1E3DD',
+        borderRadius: 3,
+      }}
+    >
+      <TouchableOpacity onPress={onPress}>
+        <MaterialCommunityIcons name="window-open" size={32} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const SnapPicture = ({ onSnap }) => (
+  <View
+    style={{
+      marginBottom: 5,
+      backgroundColor: '#D1E3DD',
+      borderRadius: 50,
+    }}
+  >
+    <TouchableOpacity onPress={onSnap}>
+      <View style={{}}>
+        <MaterialCommunityIcons name="camera-iris" size={56} />
+      </View>
+    </TouchableOpacity>
+  </View>
+);
