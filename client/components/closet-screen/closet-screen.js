@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Button, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 
-const Column = ({ onPress, children }) => {
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+const Column = ({ onPress, children, title }) => {
   return (
     <View style={styles.column}>
       <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
-        <View style={styles.button}>{children}</View>
+        <View style={styles.button}>
+          {title ? <Text style={styles.buttonText}>{title}</Text> : children}
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -15,40 +19,62 @@ const ClosetScreen = () => (
     <View style={[styles.row]}>
       <Column
         onPress={() => {
-          console.log('A');
+          alert('Search');
         }}
-      >
-        <Text>A</Text>
-      </Column>
+        title={'Search'}
+      />
       <Column
         onPress={() => {
-          console.log('B');
+          alert('Wardrobe');
         }}
-      >
-        <Text>B</Text>
-      </Column>
+        title="Wardrobe"
+      />
     </View>
     <View style={styles.row}>
       <Column
         onPress={() => {
-          console.log('C');
+          alert('Statistics');
         }}
-      >
-        <Text>C</Text>
-      </Column>
+        title="Statistics"
+      />
       <Column
         onPress={() => {
-          console.log('D');
+          alert('Calendar');
         }}
-      >
-        <Text>D</Text>
-      </Column>
+        title="Calendar"
+      />
     </View>
   </View>
 );
+
+ClosetScreen.navigationOptions = ({ navigation }) => {
+  return {
+    title: 'Closet',
+    headerRight: (
+      <TouchableOpacity
+        style={styles.closeButton.container}
+        onPress={() => navigation.navigate('Add')}
+      >
+        <View style={styles.closeButton.view}>
+          <MaterialCommunityIcons name="window-closed" size={24} />
+        </View>
+      </TouchableOpacity>
+    ),
+  };
+};
+
 export default ClosetScreen;
 
 const styles = {
+  closeButton: {
+    container: {
+      flex: 1,
+    },
+    view: {
+      padding: 5,
+      margin: 3,
+    },
+  },
   container: {
     flex: 1,
     // width: '100%',
@@ -70,10 +96,14 @@ const styles = {
     alignItems: 'stretch',
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: '#3F88C5',
+
     flex: 1,
     justifyContent: 'center',
     alignContent: 'center',
     alignItems: 'center',
+  },
+  buttonText: {
+    color: '#F49D37',
   },
 };
